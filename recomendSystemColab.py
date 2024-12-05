@@ -86,7 +86,11 @@ def recommend(username, user_list):
 
     distances = {}
     for game_name, game_data in games_data.items():
-        distances[game_name] = manhattan(medium_taste, game_data)
+        if game_name in user_games:
+            continue
+        else:
+            distances[game_name] = manhattan(medium_taste, game_data)
+            
 
     # Normalizar as distâncias para calcular porcentagem de recomendação
     max_distance = max(distances.values())
