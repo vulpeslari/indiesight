@@ -135,12 +135,35 @@ games_data = load_games_data()
 # Função para adicionar à lista de um usuário
 def add_rating(username, game):
     new_entry = pd.DataFrame({"Username": [username], "Game": [game]})
-    new_entry.to_csv('dataset.csv', mode='a', header=False, index=False)
+    with open('dataset.csv', mode='a', newline='', encoding='utf-8') as file:
+        new_entry.to_csv(file, header=False, index=False)
+
 
 # Função de carregamento
 def loading_screen():
     with st.spinner('Carregando...'):
         time.sleep(3)
+
+
+def username_input(users_list):
+    # Lista de usuários únicos do dataset
+    user_options = users_list['Username'].unique().tolist()
+
+    # Adiciona uma opção para inserir um novo usuário
+    user_options.insert(0, "Adicionar Novo Usuário")
+
+    # Selectbox para escolher um nome existente ou inserir um novo
+    selected_option = st.selectbox("Selecione um nome de usuário ou adicione um novo:", user_options)
+
+    if selected_option == "Adicionar Novo Usuário":
+        # Campo de texto para inserir um novo nome
+        new_username = st.text_input("Digite o nome de usuário:")
+        if new_username:
+            return new_username
+    else:
+        # Retorna o nome selecionado
+        return selected_option
+
 
 # Função principal para a página
 def main_page():
@@ -181,17 +204,25 @@ def main_page():
 
     # Aba 1: Recomendação de Jogos
     with tab1:
-        st.header("Ajude recomendando um jogo!")
+        st.header("Ajude recomendando jogos!")
         
-        username = st.text_input("Digite um nome de usuário:")
+        username = username_input(users_lists)
         
         if username:
-            game_options = list(games_data.keys())
-            game = st.selectbox("Escolha um jogo:", game_options)
-
-            if st.button("Adicionar Recomendação"):
-                add_rating(username, game)
-                st.success(f"Recomendação de '{username}' adicionada com sucesso!")
+            # Filtrar jogos que o usuário já recomendou
+            recommended_games = users_lists[users_lists['Username'] == username]['Game'].tolist()
+            available_games = [game for game in games_data.keys() if game not in recommended_games]
+            
+            # Selecionar múltiplos jogos
+            selected_games = st.multiselect("Escolha os jogos para recomendar:", available_games)
+            
+            if st.button("Adicionar Recomendações"):
+                if selected_games:
+                    for game in selected_games:
+                        add_rating(username, game)
+                    st.success(f"Recomendações para '{username}' adicionadas com sucesso!")
+                else:
+                    st.warning("Nenhum jogo selecionado para recomendar.")
 
     # Aba 2: Visualizar Recomendações
     with tab2:
