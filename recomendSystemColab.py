@@ -232,10 +232,23 @@ def main_page():
                         if game_name in games_desc:
                             # Exibir a imagem do jogo ao lado da descrição
                             colA, colB = st.columns([3, 4])
+
                             with colA:
                                 st.image(games_desc[game_name]["image"], width=250)
+
                             with colB:
+                                # Descrição do jogo
                                 st.write(games_desc[game_name]["description"])
+                                
+                                # Atributos com valor 10 destacados
+                                highlighted_attributes = [
+                                    f"<div style='display: inline-block; padding: 5px 10px; margin: 5px; background-color: purple; color: white; border-radius: 5px;'>{key.replace("_", " ")}</div>"
+                                    for key, value in games_data[game_name].items()
+                                    if value == 10
+                                ]
+
+                                if highlighted_attributes:
+                                    st.markdown(" ".join(highlighted_attributes), unsafe_allow_html=True)
 
                     with col2:
                         # Exibir a pontuação de recomendação
